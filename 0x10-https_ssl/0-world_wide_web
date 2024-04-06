@@ -1,25 +1,16 @@
 #!/usr/bin/env bash
-# script to dig subdomain records for the domain specified
-# shellcheck disable=SC2027
-# shellcheck disable=SC2086
-
-function get_a_records(){
-    if [[ -n "$2" ]]; then
-        response="$(dig "$2.$1" | grep -i -A1 "answer section" | tail -n 1)"
-        destination="$(echo "$response" | awk '{ print $5 }')"
-        record_type="$(echo "$response" | awk '{ print $4 }')"
-        echo  "The subdomain "$2" is a "$record_type" record and points to "$destination""
-
-    else
-        subdomains=(www lb-01 web-01 web-02)
-        for sub_d in "${subdomains[@]}"; do
-            response="$(dig "$sub_d.$1" | grep -i -A1 "answer section" | tail -n 1)"
-            destination="$(echo ""$response"" | awk '{ print $5 }')"
-            record_type="$(echo """$response""" | awk '{ print $4 }')"
-            echo "The subdomain ""$sub_d"" is a ""$record_type"" record and points to ""$destination"""
-
-        done
-    fi
- 
+# Bash script that will display information about subdomains
+domain () {
+if [ "$2" ];
+then
+    echo -n "The subdomain $2 is a"
+    dig "$2.$1" | grep -A1 'ANSWER SECTION:' | awk '{print " " $4 " record and points to " $5}' | tail -n 1
+else
+    for i in www lb-01 web-01 web-02
+    do
+        echo -n "The subdomain $i is a"
+        dig "$i.$1" | grep -A1 'ANSWER SECTION:' | awk '{print " " $4 " record and points to " $5}' | tail -n 1
+    done
+fi
 }
-get_a_records "$1" "$2";
+domain "$1" "$2"
